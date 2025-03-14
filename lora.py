@@ -28,7 +28,7 @@ class LoRALinear(nn.Linear):
             self.lora_scaling = lora_alpha / lora_rank  # TODO: Compute scaling factor
 
             #TODO: Fill in the "..."
-            self.lora_A = nn.Parameter(torch.randn(lora_rank, in_features, device=device, dtype=dtype))
+            self.lora_A = nn.Parameter(torch.zeros(lora_rank, in_features, device=device, dtype=dtype))
             self.lora_B = nn.Parameter(torch.zeros(out_features, lora_rank, device=device, dtype=dtype))
 
             self.lora_A.requires_grad = False
@@ -44,7 +44,7 @@ class LoRALinear(nn.Linear):
         if self.is_lora():
             #TODO: Initialize both lora_A and lora_B with torch.nn.init. Refer to the paper to see how each is initialize
             #Hint: lora_A is initialized using kaiming_uniform_ using negative slope (a) as math.sqrt(5)
-            nn.init.kaiming_uniform_(self.lora_A) #, a=math.sqrt(5))
+            nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
             nn.init.zeros_(self.lora_B)  # Initialize lora_B with zeros
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
@@ -56,14 +56,14 @@ class LoRALinear(nn.Linear):
             result = F.linear(input, self.weight, self.bias)
             if self.is_lora():
                 # TODO: Remember to use dropout on the input before multiplying with lora_B and lora_A if the weights are not merged
-                result += self.lora_scaling * F.linear(self.lora_dropout(input), self.lora_A @ self.lora_B)
+                result += self.lora_scaling * F.linear(self.lora_dropout(input), self.lora_B @ self.lora_A)
             return result
 
     def train(self, mode: bool = True) -> "LoRALinear":
         #TODO: Set the linear layer into train mode
         #Hint: Make sure to demerge LORA matrices if already merged
         super().train(mode)
-        if mode and self.has_weights_merged:
+        if self.is_lora() and mode and self.has_weights_merged:
             self.weight.data -= self.lora_scaling * (self.lora_B @ self.lora_A)
             self.has_weights_merged = False
         return self
@@ -72,7 +72,7 @@ class LoRALinear(nn.Linear):
         #TODO: Set the linear layer into eval mode
         #Hint: Make sure to merge LORA matrices if already demerged
         super().eval()
-        if not self.has_weights_merged:
+        if self.is_lora() and not self.has_weights_merged:
             self.weight.data += self.lora_scaling * (self.lora_B @ self.lora_A)
             self.has_weights_merged = True
         return self
