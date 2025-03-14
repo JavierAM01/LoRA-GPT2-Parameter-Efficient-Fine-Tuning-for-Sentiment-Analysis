@@ -44,7 +44,7 @@ class LoRALinear(nn.Linear):
         if self.is_lora():
             #TODO: Initialize both lora_A and lora_B with torch.nn.init. Refer to the paper to see how each is initialize
             #Hint: lora_A is initialized using kaiming_uniform_ using negative slope (a) as math.sqrt(5)
-            nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
+            nn.init.kaiming_uniform_(self.lora_A) #, a=math.sqrt(5))
             nn.init.zeros_(self.lora_B)  # Initialize lora_B with zeros
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
