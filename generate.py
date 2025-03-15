@@ -70,9 +70,11 @@ class ModelSampler:
             pred_samples[i] = {'response': response, 'true label': row['label']}
             ################################################## TODO: ##################################################
             truncated_response = #TODO: Truncate response to get predicted label (hint: the response is a string which includes input prompt plus the generated label)
-            if # TODO: Check if "positive" is in the truncated response
+            positive_if = "positive" in truncated_response or "1" in truncated_response
+            negative_if = "negative" in truncated_response or "0" in truncated_response
+            if positive_if and not negative_if: # TODO: Check if "positive" is in the truncated response
                 predicted_label = 1
-            elif #TODO: Check if "negative" is in the truncated response
+            elif negative_if and not positive_if: #TODO: Check if "negative" is in the truncated response
                 predicted_label = 0
             else:
                 predicted_label = -1

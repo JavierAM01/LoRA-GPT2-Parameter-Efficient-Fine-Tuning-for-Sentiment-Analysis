@@ -218,8 +218,8 @@ def main():
                 model_args[k] = getattr(model.config, k)
             ################################################## TODO: ##################################################
             #TODO: Mark the model parameters with LORA fine-tuneable.
+            mark_only_lora_as_trainable(model)
             
-            raise NotImplementedError
         else:
             override_args = dict(dropout=args.dropout)
 
