@@ -219,6 +219,7 @@ def main():
             ################################################## TODO: ##################################################
             #TODO: Mark the model parameters with LORA fine-tuneable.
             mark_only_lora_as_trainable(model)
+            count_parameters(model)
             
         else:
             override_args = dict(dropout=args.dropout)
@@ -349,6 +350,20 @@ def main():
         "last_iter_neg_counter": neg_counter,
         "last_iter_correct_counter": counter
     })
+
+# extra to count parameters
+def count_parameters(model):
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    non_trainable_params = total_params - trainable_params
+
+    print(f"Total Parameters: {total_params}")
+    print(f"Trainable Parameters: {trainable_params}")
+    print(f"Non-Trainable Parameters: {non_trainable_params}")
+
+    # Percentage of trainable parameters
+    percentage = (trainable_params / total_params) * 100
+    print(f"Percentage of Fine-Tuned Parameters: {percentage:.2f}%")
 
 
 if __name__ == "__main__":
