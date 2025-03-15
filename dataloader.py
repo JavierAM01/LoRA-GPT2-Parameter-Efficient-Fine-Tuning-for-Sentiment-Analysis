@@ -68,6 +68,8 @@ class CustomDataLoader:
 
         self.opt = opt  # javi : add opt parameter <- for prompt variation
 
+        print("Prompt option:", self.opt)
+
     def _add_instruction_finetuning(self, rec):
         # Convert label from 0/1 to "negative"/"positive"
         label = "positive" if rec["label"] == 1 else "negative"
