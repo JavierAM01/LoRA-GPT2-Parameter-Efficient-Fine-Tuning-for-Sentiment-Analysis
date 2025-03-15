@@ -17,5 +17,5 @@ python train.py --init_from="gpt2-medium" \
         --out_dir="gpt-lora-full-finetune" \
         --lora_rank=0 \
         --lora_dropout=0.05
-python generate.py --init-from="resume" \
+python generate.py --init_from="resume" \
         --out_dir="generate-gpt-lora-full-finetune"
