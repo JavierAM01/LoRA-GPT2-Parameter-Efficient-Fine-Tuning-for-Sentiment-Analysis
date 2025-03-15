@@ -58,6 +58,8 @@ def get_sentiment_prompt(text, label='', opt=-1):
 
 class CustomDataLoader:
     def __init__(self, dataset,  tokenizer, batch_size=8, opt=-1):
+        self.opt = opt  # javi : add opt parameter <- for prompt variation
+
         self.tokenizer = tokenizer
         self.batch_size = batch_size
         self.data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer, return_tensors="pt", padding="max_length", max_length=1024)
@@ -66,7 +68,7 @@ class CustomDataLoader:
         self.formatted_dataset = dataset.map(self._add_instruction_finetuning, remove_columns=dataset.column_names, load_from_cache_file=False)
         self.formatted_dataset.set_format(type='torch', columns=['instr_tuned_text', 'instr_len'])
 
-        self.opt = opt  # javi : add opt parameter <- for prompt variation
+
 
         print("Prompt option:", self.opt)
 
