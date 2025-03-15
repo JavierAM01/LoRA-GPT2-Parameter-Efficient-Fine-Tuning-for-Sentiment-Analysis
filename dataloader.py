@@ -3,12 +3,58 @@ from torch.utils.data import DataLoader
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-def get_sentiment_prompt(text, label=''):
-    #TODO: For Question 5.11, try a different prompt template for better/worse performance.
-    instruction = "Please read the following text and classify it as either positive or negative sentiment. Remember to consider the overall tone, context, and emotional cues conveyed in the text. Positive sentiments generally express happiness, satisfaction, or positivity, while negative sentiments convey sadness, anger, or negativity."
+# List of 10 different prompt variations with explanations
+custom_prompts = [
+    # 1. More direct and concise
+    "Classify the following text as either positive or negative sentiment.",  
+    # Simplifies the instruction, making it more direct. The model may respond faster but with less context.
+
+    # 2. Example-based instruction
+    "Classify the sentiment of the given text as positive or negative. For example, 'I love this!' is positive, while 'This is terrible' is negative.",  
+    # Providing examples may help the model generalize better and reduce ambiguity.
+
+    # 3. Emphasizing objectivity
+    "Analyze the sentiment of the following text. Consider only the emotional content and ignore personal biases.",  
+    # Encourages an analytical approach, potentially reducing subjective interpretation.
+
+    # 4. Asking for a confidence level
+    "Determine whether the following text expresses positive or negative sentiment. Also, rate your confidence on a scale of 1 to 5.",  
+    # Adding a confidence rating might make the model more cautious in its classification.
+
+    # 5. Encouraging a structured response
+    "Please analyze the following text and classify its sentiment. Respond in the format: 'Sentiment: [Positive/Negative]. Explanation: [Brief reason]'",  
+    # Encourages structured output, potentially improving interpretability.
+
+    # 6. Emphasizing emotions explicitly
+    "Does the following text convey happiness, excitement, satisfaction (positive) or anger, frustration, disappointment (negative)?",  
+    # By explicitly listing emotions, the model may better capture sentiment nuances.
+
+    # 7. Forcing binary choice
+    "Decide whether the following text is positive or negative. Only return 'Positive' or 'Negative' as your response.",  
+    # Forces the model into a strict binary choice, eliminating ambiguity.
+
+    # 8. Encouraging contextual understanding
+    "Analyze the sentiment of the following text by considering its context. Could the same words have different meanings based on the situation?",  
+    # Encourages deeper contextual analysis, which may help with sarcasm detection.
+
+    # 9. Making it conversational
+    "Imagine you're helping a friend understand emotions in text. Would you say the following text has a positive or negative sentiment?",  
+    # Making it more conversational might yield more human-like and intuitive responses.
+
+    # 10. Using a Likert scale approach
+    "Classify the sentiment of the following text as Positive, Negative, or Neutral if it does not strongly lean either way.",  
+    # Introduces a neutral category, which might reduce overconfidence in classification.
+]
+
+def get_sentiment_prompt(text, label='', opt=-1):
+    if opt == -1:
+        instruction = "Please read the following text and classify it as either positive or negative sentiment. Remember to consider the overall tone, context, and emotional cues conveyed in the text. Positive sentiments generally express happiness, satisfaction, or positivity, while negative sentiments convey sadness, anger, or negativity."
+    else:
+        instruction = custom_prompts[opt]
 
     INSTRUCTION_TEMPLATE = "Instruction: {}\nText: {}\nLabel: {}"
-    return INSTRUCTION_TEMPLATE.format(instruction, text, label) 
+    return INSTRUCTION_TEMPLATE.format(instruction, text, label)
+
 
 class CustomDataLoader:
     def __init__(self, dataset,  tokenizer, batch_size=8):
@@ -20,10 +66,10 @@ class CustomDataLoader:
         self.formatted_dataset = dataset.map(self._add_instruction_finetuning, remove_columns=dataset.column_names, load_from_cache_file=False)
         self.formatted_dataset.set_format(type='torch', columns=['instr_tuned_text', 'instr_len'])
 
-    def _add_instruction_finetuning(self, rec):
+    def _add_instruction_finetuning(self, rec, opt=-1):  # javi : add opt parameter <- for prompt variation
         # Convert label from 0/1 to "negative"/"positive"
         label = "positive" if rec["label"] == 1 else "negative"
-        text_with_prompt = get_sentiment_prompt(rec["text"], label)
+        text_with_prompt = get_sentiment_prompt(rec["text"], label, opt=opt)
 
         # Find "Label:" position and tokenize up to that point
         label_pos = text_with_prompt.find("Label:")

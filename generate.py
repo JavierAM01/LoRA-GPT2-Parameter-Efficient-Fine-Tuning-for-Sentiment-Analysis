@@ -10,7 +10,7 @@ import dataloader
 from tqdm.auto import tqdm
 
 class ModelSampler:
-    def __init__(self, out_dir, init_from="resume", device="cuda", max_new_tokens=5, temperature=0.6, top_k=1, ckpt_last = False):
+    def __init__(self, out_dir, init_from="resume", device="cuda", max_new_tokens=5, temperature=0.6, top_k=1, ckpt_last = False, opt=-1):
         self.out_dir = out_dir
         self.init_from = init_from
         self.device = device
@@ -18,6 +18,8 @@ class ModelSampler:
         self.temperature = temperature
         self.top_k = top_k
         self.ckpt_last = ckpt_last
+
+        self.opt = opt   # javi : for prompt variation
 
         # Initialize sampling as part of __init__
         self._initialize_sampling()
@@ -65,7 +67,7 @@ class ModelSampler:
     def predict_labels(self, dataset):
         pred_samples = {}
         for i, row in tqdm(enumerate(dataset), total=len(dataset)):
-            prompt = dataloader.get_sentiment_prompt(row["text"])
+            prompt = dataloader.get_sentiment_prompt(row["text"], opt=self.opt)
             response = self.get_generation(prompt)
             pred_samples[i] = {'response': response, 'true label': row['label']}
             ################################################## TODO: ##################################################
@@ -114,11 +116,12 @@ if __name__ == "__main__":
     parser.add_argument('--max_new_tokens', type=int, default=5, help='Maximum new tokens to generate')
     parser.add_argument('--temperature', type=float, default=0.6, help='Temperature for generation')
     parser.add_argument('--top_k', type=int, default=1, help='Top K tokens to sample from')
+    parser.add_argument('--opt', type=int, default=-1, help='Choice for prompt template')  # javi : added opt argument
     args = parser.parse_args()
 
-    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k)
+    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, opt=args.opt)
     accuracy, pos_counter, neg_counter, counter = sampler.get_accuracy()
     print(f"Best Val Checkpoint || Accuracy: {accuracy}, Positive Predictions: {pos_counter}, Negative Predictions: {neg_counter}, Correct Predictions: {counter}")
-    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, ckpt_last=True)
+    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, ckpt_last=True, opt=args.opt)
     accuracy, pos_counter, neg_counter, counter = sampler.get_accuracy()
     print(f"Last Iter Checkpoint || Accuracy: {accuracy}, Positive Predictions: {pos_counter}, Negative Predictions: {neg_counter}, Correct Predictions: {counter}")
