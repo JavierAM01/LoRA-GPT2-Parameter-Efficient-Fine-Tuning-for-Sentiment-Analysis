@@ -116,12 +116,12 @@ if __name__ == "__main__":
     parser.add_argument('--max_new_tokens', type=int, default=5, help='Maximum new tokens to generate')
     parser.add_argument('--temperature', type=float, default=0.6, help='Temperature for generation')
     parser.add_argument('--top_k', type=int, default=1, help='Top K tokens to sample from')
-    parser.add_argument('--opt', type=int, default=-1, help='Choice for prompt template')  # javi : added opt argument
+    parser.add_argument('--prompt', type=int, default=-1, choices=list(range(-1,10)), help='Choice for prompt template')  # javi : added opt argument
     args = parser.parse_args()
 
-    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, opt=args.opt)
+    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, opt=args.prompt)
     accuracy, pos_counter, neg_counter, counter = sampler.get_accuracy()
     print(f"Best Val Checkpoint || Accuracy: {accuracy}, Positive Predictions: {pos_counter}, Negative Predictions: {neg_counter}, Correct Predictions: {counter}")
-    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, ckpt_last=True, opt=args.opt)
+    sampler = ModelSampler(args.out_dir, args.init_from, args.device, args.max_new_tokens, args.temperature, args.top_k, ckpt_last=True, opt=args.prompt)
     accuracy, pos_counter, neg_counter, counter = sampler.get_accuracy()
     print(f"Last Iter Checkpoint || Accuracy: {accuracy}, Positive Predictions: {pos_counter}, Negative Predictions: {neg_counter}, Correct Predictions: {counter}")

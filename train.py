@@ -26,6 +26,7 @@ def get_args():
     parser.add_argument('--out_dir', type=str, default='lora-gpt-default',help='Output directory.', required=True)
     parser.add_argument('--init_from', type=str, default='gpt2' , help='Initialization method.',  required=True)
     parser.add_argument('--wandb_project', type=str, default='HW3_lora_finetune_handout', help='WandB project name.')
+    parser.add_argument('--prompt', type=int, default=-1, choices=list(range(-1,10)), help='Choice for prompt template')  # javi : added opt argument
 
     # LoRA settings
     parser.add_argument('--lora_rank', type=int, default=128, help='LoRA rank.')
@@ -173,8 +174,8 @@ def main():
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
     # Instantiate CustomDataLoader
-    custom_loader_train = CustomDataLoader(train_dataset, tokenizer, args.batch_size)
-    custom_loader_val = CustomDataLoader(val_dataset, tokenizer, args.batch_size)
+    custom_loader_train = CustomDataLoader(train_dataset, tokenizer, args.batch_size, opt=args.prompt)
+    custom_loader_val = CustomDataLoader(val_dataset, tokenizer, args.batch_size, opt=args.prompt)
 
     train_loader = custom_loader_train.get_loader(shuffle=True)
     val_loader = custom_loader_val.get_loader(shuffle=True)

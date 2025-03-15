@@ -57,7 +57,7 @@ def get_sentiment_prompt(text, label='', opt=-1):
 
 
 class CustomDataLoader:
-    def __init__(self, dataset,  tokenizer, batch_size=8):
+    def __init__(self, dataset,  tokenizer, batch_size=8, opt=-1):
         self.tokenizer = tokenizer
         self.batch_size = batch_size
         self.data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer, return_tensors="pt", padding="max_length", max_length=1024)
@@ -66,10 +66,12 @@ class CustomDataLoader:
         self.formatted_dataset = dataset.map(self._add_instruction_finetuning, remove_columns=dataset.column_names, load_from_cache_file=False)
         self.formatted_dataset.set_format(type='torch', columns=['instr_tuned_text', 'instr_len'])
 
-    def _add_instruction_finetuning(self, rec, opt=-1):  # javi : add opt parameter <- for prompt variation
+        self.opt = opt  # javi : add opt parameter <- for prompt variation
+
+    def _add_instruction_finetuning(self, rec):
         # Convert label from 0/1 to "negative"/"positive"
         label = "positive" if rec["label"] == 1 else "negative"
-        text_with_prompt = get_sentiment_prompt(rec["text"], label, opt=opt)
+        text_with_prompt = get_sentiment_prompt(rec["text"], label, opt=self.opt)
 
         # Find "Label:" position and tokenize up to that point
         label_pos = text_with_prompt.find("Label:")
