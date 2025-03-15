@@ -123,7 +123,7 @@ def main():
     # Get arguments
     args = get_args()
 
-    with open("priv/wandb_api.json") as json_file:
+    with open("priv/wandb_api.json", "r") as json_file:
         credentials = json.load(json_file)
 
     wandb_api = credentials['wandb_api_key']
