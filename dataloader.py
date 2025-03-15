@@ -4,7 +4,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 
 # List of 10 different prompt variations with explanations
-custom_prompts = [
+old_custom_prompts = [
     # 1. More direct and concise
     "Classify the following text as either positive or negative sentiment.",  
     # Simplifies the instruction, making it more direct. The model may respond faster but with less context.
@@ -44,6 +44,18 @@ custom_prompts = [
     # 10. Using a Likert scale approach
     "Classify the sentiment of the following text as Positive, Negative, or Neutral if it does not strongly lean either way.",  
     # Introduces a neutral category, which might reduce overconfidence in classification.
+]
+
+custom_prompts = [
+
+    # Simpler Version (More Direct and Concise)
+    "Read the text below and classify its sentiment as either positive or negative. Positive means happiness or satisfaction, while negative means sadness or anger.",
+
+    # Similar Version (Slightly Refined for Clarity)
+    "Classify the sentiment of the following text as either positive or negative. A positive sentiment conveys happiness, satisfaction, or optimism, while a negative sentiment reflects sadness, frustration, or dissatisfaction. Focus on the overall tone and context.",
+
+    # More Complex Version (Adds Explicit Guidance for Better Understanding)
+    "Analyze the following text and determine whether its sentiment is positive or negative. Consider the emotional intent, tone, and wording used. Positive sentiment includes expressions of joy, gratitude, enthusiasm, or appreciation, while negative sentiment includes frustration, disappointment, criticism, or sadness. Provide the most accurate classification based on these cues."
 ]
 
 def get_sentiment_prompt(text, label='', opt=-1):
